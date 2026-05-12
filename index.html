@@ -107,7 +107,8 @@
         <p>⚙️ 設定</p>
         <input type="text" id="set-title" placeholder="修改計畫名稱">
         <input type="number" id="set-goal" placeholder="設定目標金額">
-        <input type="text" id="set-bg" placeholder="貼上背景圖片網址">
+        <p style="margin-top:15px;">📸 更換背景圖</p>
+<input type="file" id="file-bg" accept="image/*" style="width:100%; padding:5px;">
         <button class="btn-glass" onclick="updateSettings()">更新設定</button>
     </div>
 </div>
@@ -119,6 +120,45 @@
         goal: 10000,
         current: 0,
         bg: ""
+        // 1. 修改更新設定的函式 (這個要對應你 HTML 裡的按鈕)
+async function updateSettings() {function convertAndCompress(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const maxW = 1080; // 限制寬度
+                let w = img.width, h = img.height;
+                if (w > maxW) { h *= maxW / w; w = maxW; }
+                canvas.width = w; canvas.height = h;
+                ctx.drawImage(img, 0, 0, w, h);
+                // 壓縮品質設定為 0.7
+                resolve(canvas.toDataURL('image/jpeg', 0.7));
+            };
+        };
+    });
+}
+    let newTitle = document.getElementById('set-title').value;
+    let newGoal = document.getElementById('set-goal').value;
+    let fileInput = document.getElementById('file-bg'); // 對應新加的 input id
+
+    if (newTitle) data.title = newTitle;
+    if (newGoal) data.goal = parseFloat(newGoal);
+
+    // 檢查是否有選取檔案
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        // 呼叫下方的壓縮工具，轉成代碼存入 data.bg
+        data.bg = await convertAndCompress(file);
+    }
+
+    refreshUI();
+    alert("設定與背景已儲存！");
+}
     };
 
     function refreshUI() {
