@@ -226,7 +226,8 @@ return {
   margin-top: 10px;
   opacity: 0.8;
 }
-</style>/* 毛玻璃按鈕樣式 */
+
+/* 毛玻璃按鈕樣式 */
 .btn-glass {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -250,3 +251,4 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
+</style>
