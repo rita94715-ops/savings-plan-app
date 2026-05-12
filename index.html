@@ -1,19 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>💰</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="一個可添加到 iPhone 主畫面的存錢計畫小程序 PWA 應用" />
-    <meta name="theme-color" content="#4CAF50" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="存錢計畫" />
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%234CAF50' width='180' height='180' rx='40'/><text y='130' font-size='120' fill='white' text-anchor='middle' x='90'>💰</text></svg>" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>存錢計畫 - Savings Plan</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; text-align: center; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        .progress-container { background: #eee; border-radius: 10px; height: 20px; margin: 20px 0; overflow: hidden; }
+        #progress-bar { background: #4CAF50; width: 0%; height: 100%; transition: width 0.3s; }
+        input { width: 80%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 id="title-display">我的存錢計畫</h2>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <p>目前金額: $<span id="current-display">0</span> / 目標: $<span id="goal-display">0</span></p>
+        <input type="number" id="add-val" placeholder="輸入存入金額">
+        <button onclick="addMoney()">存錢</button>
+        <hr>
+        <input type="text" id="set-title" placeholder="修改計畫名稱">
+        <input type="number" id="set-goal" placeholder="設定目標金額">
+        <button onclick="updateSettings()">更新設定</button>
+    </div>
+
+    <script>
+        let data = JSON.parse(localStorage.getItem('my_save_data')) || { title: "存錢計畫", goal: 1000, current: 0 };
+        
+        function refresh() {
+            document.getElementById('title-display').innerText = data.title;
+            document.getElementById('goal-display').innerText = data.goal;
+            document.getElementById('current-display').innerText = data.current;
+            let per = (data.current / data.goal) * 100;
+            document.getElementById('progress-bar').style.width = Math.min(per, 100) + "%";
+            localStorage.setItem('my_save_data', JSON.stringify(data));
+        }
+
+        function addMoney() {
+            let v = parseFloat(document.getElementById('add-val').value) || 0;
+            data.current += v;
+            refresh();
+        }
+
+        function updateSettings() {
+            data.title = document.getElementById('set-title').value || data.title;
+            data.goal = parseFloat(document.getElementById('set-goal').value) || data.goal;
+            refresh();
+        }
+        refresh();
+    </script>
+</body>
 </html>
