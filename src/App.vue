@@ -1,4 +1,8 @@
 <template>
+  <div class="bg-settings">
+  <input v-model="userBgUrl" placeholder="請輸入背景圖片網址">
+  <button @click="saveBg">更換背景</button>
+</div>
   <div class="app-container">
     <header class="app-header">
       <h1>💰 存錢計畫</h1>
@@ -46,7 +50,36 @@ export default {
     PlanCard,
     PlanModal
   },
-  setup() {
+  setup() {// 在 setup() 內部加入這段
+const userBgUrl = ref(localStorage.getItem('user-bg') || '');
+
+const saveBg = () => {
+  localStorage.setItem('user-bg', userBgUrl.value);
+  // 立即套用到背景
+  document.body.style.backgroundImage = `url(${userBgUrl.value})`;
+  document.body.style.backgroundSize = 'cover';
+  document.body.style.backgroundAttachment = 'fixed';
+};
+
+// 修改你原本的 onMounted (第 55-57 行)
+onMounted(() => {
+  plans.value = loadPlans();
+  // 加上這一行來載入背景
+  if (userBgUrl.value) {
+    document.body.style.backgroundImage = `url(${userBgUrl.value})`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundAttachment = 'fixed';
+  }
+});
+
+// 記得要把變數 return 出去給畫面使用 (在 setup 最後的 return 裡面加上)
+return {
+  plans,
+  showModal,
+  // ... 其他原本有的 ...
+  userBgUrl, // 新加的
+  saveBg      // 新加的
+}
     const plans = ref([])
     const showModal = ref(false)
     const isEditing = ref(false)
@@ -193,4 +226,27 @@ export default {
   margin-top: 10px;
   opacity: 0.8;
 }
-</style>
+</style>/* 毛玻璃按鈕樣式 */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* 針對蘋果手機 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 確保背景能蓋滿全螢幕 */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-position: center;
+  background-repeat: no-repeat;
+}
