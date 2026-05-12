@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>存錢小助手</title>
     <style>
-        body { margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: #4a90e2; background-size: cover; background-position: center; background-attachment: fixed; font-family: sans-serif; transition: 0.5s; }
-        .container { width: 90%; max-width: 400px; padding: 20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); color: white; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-        .progress-box { background: rgba(0,0,0,0.1); border-radius: 10px; height: 15px; margin: 15px 0; overflow: hidden; }
-        #bar { background: #00f2fe; width: 0%; height: 100%; transition: 0.5s; }
-        input { width: 80%; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color: white; outline: none; }
-        .btn { background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4); border-radius: 10px; padding: 10px 20px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        body { margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: #4a90e2; background-size: cover; background-position: center; background-attachment: fixed; font-family: sans-serif; transition: 0.5s; color: white; }
+        .container { width: 90%; max-width: 400px; padding: 25px; background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+        .progress-box { background: rgba(0,0,0,0.1); border-radius: 10px; height: 15px; margin: 20px 0; overflow: hidden; }
+        #bar { background: linear-gradient(90deg, #4facfe, #00f2fe); width: 0%; height: 100%; transition: 0.5s; }
+        input { width: 85%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); color: white; outline: none; }
+        .btn { background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4); border-radius: 10px; padding: 12px 25px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .btn:active { transform: scale(0.95); }
+        .setting-area { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; }
     </style>
 </head>
 <body>
@@ -24,11 +25,11 @@
     <input type="number" id="add-amount" placeholder="輸入存入金額">
     <button class="btn" onclick="addMoney()">確認存錢</button>
 
-    <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
-        <p>⚙️ 設定</p>
+    <div class="setting-area">
+        <p>⚙️ 設定區域</p>
         <input type="text" id="set-title" placeholder="修改計畫名稱">
         <input type="number" id="set-goal" placeholder="設定目標金額">
-        <p style="font-size: 0.8em; margin-bottom: 5px;">📸 更換背景</p>
+        <p style="font-size: 0.8em; margin-bottom: 5px;">📸 更換背景圖</p>
         <input type="file" id="file-bg" accept="image/*">
         <button class="btn" onclick="updateSettings()">更新設定</button>
     </div>
@@ -58,29 +59,34 @@
         let nt = document.getElementById('set-title').value;
         let ng = document.getElementById('set-goal').value;
         let fi = document.getElementById('file-bg');
+
         if (nt) data.title = nt;
         if (ng) data.goal = parseFloat(ng);
+
         if (fi.files && fi.files[0]) {
-            data.bg = await new Promise(r => {
-                const reader = new FileReader();
-                reader.readAsDataURL(fi.files[0]);
-                reader.onload = e => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height;
-                        if (w > 1080) { h *= 1080/w; w = 1080; }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        r(canvas.toDataURL('image/jpeg', 0.7));
-                    };
+            // 讀取照片並壓縮
+            const reader = new FileReader();
+            reader.readAsDataURL(fi.files[0]);
+            reader.onload = e => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > 1080) { h *= 1080/w; w = 1080; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    data.bg = canvas.toDataURL('image/jpeg', 0.7);
+                    refreshUI(); // 圖片讀完才刷畫面
                 };
-            });
+            };
+        } else {
+            refreshUI();
         }
-        refreshUI();
-        alert("設定已儲存！");
+        alert("設定已成功儲存！");
     }
+
+    // 初次開啟網頁載入資料
     refreshUI();
 </script>
 
