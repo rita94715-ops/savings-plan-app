@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>存錢小助手</title>
+    <title>我的存錢計畫</title>
     <style>
         body { margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; background: #4a90e2; background-size: cover; background-position: center; background-attachment: fixed; font-family: sans-serif; transition: 0.5s; color: white; }
         .container { width: 90%; max-width: 400px; padding: 25px; background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
@@ -36,6 +36,7 @@
 </div>
 
 <script>
+    // 所有的邏輯都必須關在 <script> 標籤內才不會變成文字
     let data = JSON.parse(localStorage.getItem('save_app_data')) || { title: "我的存錢計畫", goal: 10000, current: 0, bg: "" };
 
     function refreshUI() {
@@ -64,7 +65,6 @@
         if (ng) data.goal = parseFloat(ng);
 
         if (fi.files && fi.files[0]) {
-            // 讀取照片並壓縮
             const reader = new FileReader();
             reader.readAsDataURL(fi.files[0]);
             reader.onload = e => {
@@ -77,7 +77,7 @@
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     data.bg = canvas.toDataURL('image/jpeg', 0.7);
-                    refreshUI(); // 圖片讀完才刷畫面
+                    refreshUI();
                 };
             };
         } else {
@@ -85,8 +85,6 @@
         }
         alert("設定已成功儲存！");
     }
-
-    // 初次開啟網頁載入資料
     refreshUI();
 </script>
 
