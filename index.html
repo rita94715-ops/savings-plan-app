@@ -104,13 +104,14 @@
     <button class="btn-glass" onclick="addMoney()">確認存錢</button>
 
     <div class="setting-section">
-        <p>⚙️ 設定</p>
-        <input type="text" id="set-title" placeholder="修改計畫名稱">
-        <input type="number" id="set-goal" placeholder="設定目標金額">
-        <p style="margin-top:15px;">📸 更換背景圖</p>
-<input type="file" id="file-bg" accept="image/*" style="width:100%; padding:5px;">
-        <button class="btn-glass" onclick="updateSettings()">更新設定</button>
-    </div>
+    <p>⚙️ 設定</p>
+    <input type="text" id="set-title" placeholder="修改計畫名稱">
+    <input type="number" id="set-goal" placeholder="設定目標金額">
+    
+    <p style="margin-top:15px; font-size:0.8em; opacity:0.8;">📸 更換背景圖 (建議選直向照片)</p>
+    <input type="file" id="file-bg" accept="image/*" style="width:80%; padding:5px;">
+    
+    <button class="btn-glass" onclick="updateSettings()">更新設定</button>
 </div>
 
 <script>
@@ -121,7 +122,28 @@
         current: 0,
         bg: ""
         // 1. 修改更新設定的函式 (這個要對應你 HTML 裡的按鈕)
-async function updateSettings() {function convertAndCompress(file) {
+// 記得前面要加上 async
+async function updateSettings() {
+    let newTitle = document.getElementById('set-title').value;
+    let newGoal = document.getElementById('set-goal').value;
+    let fileInput = document.getElementById('file-bg'); // 抓取剛才加的選檔案按鈕
+
+    if (newTitle) data.title = newTitle;
+    if (newGoal) data.goal = parseFloat(newGoal);
+
+    // 處理相簿照片的邏輯
+    if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        // 讀取並壓縮圖片 (避免手機存不下)
+        data.bg = await convertAndCompress(file);
+    }
+
+    refreshUI();
+    alert("設定已儲存！");
+}
+
+// 這是必備的壓縮工具，請貼在 updateSettings 下方
+function convertAndCompress(file) {
     return new Promise((resolve) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -131,16 +153,15 @@ async function updateSettings() {function convertAndCompress(file) {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                const maxW = 1080; // 限制寬度
                 let w = img.width, h = img.height;
-                if (w > maxW) { h *= maxW / w; w = maxW; }
+                if (w > 1080) { h *= 1080 / w; w = 1080; } // 限制寬度在 1080px
                 canvas.width = w; canvas.height = h;
                 ctx.drawImage(img, 0, 0, w, h);
-                // 壓縮品質設定為 0.7
-                resolve(canvas.toDataURL('image/jpeg', 0.7));
+                resolve(canvas.toDataURL('image/jpeg', 0.7)); // 壓縮品質 0.7
             };
         };
     });
+}
 }
     let newTitle = document.getElementById('set-title').value;
     let newGoal = document.getElementById('set-goal').value;
