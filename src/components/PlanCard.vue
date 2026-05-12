@@ -29,14 +29,14 @@
         class="input-amount"
         placeholder="輸入金額"
       />
-      <button class="btn-control" @click="increaseAmount">➕</button>
+      <button class="btn-control btn-glass" @click="increaseAmount">+</button>
     </div>
 
     <div class="quick-buttons">
       <button
         v-for="amount in quickAmounts"
         :key="amount"
-        class="btn-quick"
+        class="btn-quick" class="btn-quick btn-glass"
         @click="addQuickAmount(amount)"
       >
         +{{ formatCurrency(amount) }}
