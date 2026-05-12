@@ -3,55 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>存錢計畫 - Savings Plan</title>
+    <title>我的存錢計畫</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; text-align: center; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        .progress-container { background: #eee; border-radius: 10px; height: 20px; margin: 20px 0; overflow: hidden; }
-        #progress-bar { background: #4CAF50; width: 0%; height: 100%; transition: width 0.3s; }
-        input { width: 80%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
-        button { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #4a90e2; /* 預設背景色 */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: background-image 0.5s ease;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            color: white;
+            text-align: center;
+        }
+
+        h2 { margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* 進度條樣式 */
+        .progress-box {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            height: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        #bar {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        /* 輸入框與按鈕 */
+        input {
+            width: 80%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            outline: none;
+        }
+        input::placeholder { color: rgba(255,255,255,0.6); }
+
+        .btn-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 12px 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 5px;
+        }
+        .btn-glass:active { transform: scale(0.95); background: rgba(255,255,255,0.3); }
+
+        .setting-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2 id="title-display">我的存錢計畫</h2>
-        <div class="progress-container"><div id="progress-bar"></div></div>
-        <p>目前金額: $<span id="current-display">0</span> / 目標: $<span id="goal-display">0</span></p>
-        <input type="number" id="add-val" placeholder="輸入存入金額">
-        <button onclick="addMoney()">存錢</button>
-        <hr>
+
+<div class="container">
+    <h2 id="title-display">我的存錢計畫</h2>
+    <div class="progress-box"><div id="bar"></div></div>
+    <p>目前: $<span id="curr-text">0</span> / 目標: $<span id="goal-text">0</span></p>
+    
+    <input type="number" id="add-amount" placeholder="輸入存入金額">
+    <button class="btn-glass" onclick="addMoney()">確認存錢</button>
+
+    <div class="setting-section">
+        <p>⚙️ 設定</p>
         <input type="text" id="set-title" placeholder="修改計畫名稱">
         <input type="number" id="set-goal" placeholder="設定目標金額">
-        <button onclick="updateSettings()">更新設定</button>
+        <input type="text" id="set-bg" placeholder="貼上背景圖片網址">
+        <button class="btn-glass" onclick="updateSettings()">更新設定</button>
     </div>
+</div>
 
-    <script>
-        let data = JSON.parse(localStorage.getItem('my_save_data')) || { title: "存錢計畫", goal: 1000, current: 0 };
+<script>
+    // 初始化資料
+    let data = JSON.parse(localStorage.getItem('save_app_data')) || {
+        title: "我的存錢計畫",
+        goal: 10000,
+        current: 0,
+        bg: ""
+    };
+
+    function refreshUI() {
+        document.getElementById('title-display').innerText = data.title;
+        document.getElementById('goal-text').innerText = data.goal;
+        document.getElementById('curr-text').innerText = data.current;
         
-        function refresh() {
-            document.getElementById('title-display').innerText = data.title;
-            document.getElementById('goal-display').innerText = data.goal;
-            document.getElementById('current-display').innerText = data.current;
-            let per = (data.current / data.goal) * 100;
-            document.getElementById('progress-bar').style.width = Math.min(per, 100) + "%";
-            localStorage.setItem('my_save_data', JSON.stringify(data));
+        // 更新進度條
+        let percent = (data.current / data.goal) * 100;
+        document.getElementById('bar').style.width = Math.min(percent, 100) + "%";
+
+        // 更新背景
+        if (data.bg) {
+            document.body.style.backgroundImage = `url('${data.bg}')`;
         }
 
-        function addMoney() {
-            let v = parseFloat(document.getElementById('add-val').value) || 0;
-            data.current += v;
-            refresh();
-        }
+        // 存入記憶區
+        localStorage.setItem('save_app_data', JSON.stringify(data));
+    }
 
-        function updateSettings() {
-            data.title = document.getElementById('set-title').value || data.title;
-            data.goal = parseFloat(document.getElementById('set-goal').value) || data.goal;
-            refresh();
-        }
-        refresh();
-    </script>
+    function addMoney() {
+        let amt = parseFloat(document.getElementById('add-amount').value) || 0;
+        data.current += amt;
+        document.getElementById('add-amount').value = ""; // 清空輸入框
+        refreshUI();
+    }
+
+    function updateSettings() {
+        let newTitle = document.getElementById('set-title').value;
+        let newGoal = document.getElementById('set-goal').value;
+        let newBg = document.getElementById('set-bg').value;
+
+        if (newTitle) data.title = newTitle;
+        if (newGoal) data.goal = parseFloat(newGoal);
+        if (newBg) data.bg = newBg;
+
+        refreshUI();
+        alert("設定已儲存！");
+    }
+
+    // 頁面開啟時執行一次
+    refreshUI();
+</script>
+
 </body>
 </html>
